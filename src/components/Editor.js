@@ -1,29 +1,35 @@
-import React, {useState} from "react";
-import 'codemirror/lib/codemirror.css' 
-import 'codemirror/theme/material.css'
-import 'codemirror/mode/xml/xml'
-import 'codemirror/mode/javascript/javascript'
-import 'codemirror/mode/css/css'
-import { Controlled as ControlledEditor } from 'react-codemirror2'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faCompressAlt, faExpandAlt } from '@fortawesome/free-solid-svg-icons'
+import React, { useState } from "react";
+import CodeMirror from '@uiw/react-codemirror';
+import { javascript } from '@codemirror/lang-javascript';
+import { html } from '@codemirror/lang-html';
+import { css } from '@codemirror/lang-css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCompressAlt, faExpandAlt } from '@fortawesome/free-solid-svg-icons';
 
-export default function Editor(props){
-
-
+export default function Editor(props) {
     const {
         language,
         displayName,
         value,
         onChange
-    } = props
-
+    } = props;
 
     const [open, setOpen] = useState(true);
 
-    function handleChange(editor, data, value){
-        onChange(value)
-    }
+    // Function to determine which language extension to use
+    const getLanguageExtension = () => {
+        switch (language) {
+            case 'javascript':
+                return javascript();
+            case 'css':
+                return css();
+            case 'xml':
+            case 'html':
+                return html();
+            default:
+                return javascript();
+        }
+    };
 
     return (
         <div className={`editor-container ${open ? '' : 'collapsed'}`}>
@@ -36,18 +42,20 @@ export default function Editor(props){
                     <FontAwesomeIcon icon={open ? faCompressAlt : faExpandAlt}/>
                 </button>
             </div>
-            <ControlledEditor
-            onBeforeChange={handleChange}
-            value={value}
-            className="code-mirror-wrapper"
-            options={{
-                lineWrapping: true,
-                lint: true,
-                mode: language,
-                theme: 'material',
-                lineNumbers: true
-            }}
+            <CodeMirror
+                value={value}
+                height="100%"
+                theme="dark"
+                extensions={[getLanguageExtension()]}
+                onChange={onChange}
+                className="code-mirror-wrapper"
+                basicSetup={{
+                    lineNumbers: true,
+                    foldGutter: true,
+                    highlightActiveLine: true,
+                    lineWrapping: true
+                }}
             />
         </div>
-    )
+    );
 }
